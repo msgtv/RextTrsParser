@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчет за день {{ day }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .highlight { font-weight: bold; color: #1a73e8; }
+    </style>
+</head>
+<body>
+    <h1>Отчет за день {{ day }}</h1>
+    <h2>Статистика ставок</h2>
+    <ul>
+        <li>до 10к: {{ stats['st1'] }}</li>
+        <li>от 10к до 50к: {{ stats['st2'] }}</li>
+        <li>от 50к до 100к: {{ stats['st3'] }}</li>
+        <li>от 100к до 500к: {{ stats['st4'] }}</li>
+        <li>от 500к до 991к: {{ stats['st5'] }}</li>
+        <li>от 991к: {{ stats['st6'] }}</li>
+    </ul>
+
+    <h2>Ставки по часам</h2>
+    {{ hourly_counts_table|safe }}
+
+    <h2>Сводка по банку</h2>
+    <p>Банк $WOOF - <span class="highlight">{{ woof_sum }}</span></p>
+    <p>Банк $TON - <span class="highlight">{{ ton_sum }}</span></p>
+    <p>{{ reached }} $TON за ставку {{ woof_betted }} $WOOF</p>
+</body>
+</html>

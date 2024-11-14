@@ -15,27 +15,58 @@ TARGET_ADDRESS = "UQBBzGtr3y5pb1Vc2HhhbHFObxbWq2X4El3RSUJ3jO3wPyUa"
 
 PATTERN = re.compile(r'\d+(\.\d+)?\s+TON\s+Ref#\w+={6}', flags=re.IGNORECASE)
 
-UTC_OFFSET = 5  # Часовой пояс
+START_DATE = datetime.strptime("2024-11-13 16:00:00", "%Y-%m-%d %H:%M:%S")
+END_DATE = datetime.strptime("2024-11-14 16:00:00", "%Y-%m-%d %H:%M:%S")
 
-START_DATE = datetime.strptime("2024-11-14 16:00:00", "%Y-%m-%d %H:%M:%S")
-END_DATE = datetime.strptime("2024-11-15 16:00:00", "%Y-%m-%d %H:%M:%S")
+# DAY = 2
+# DATA_PATH = f'data/day{DAY}'
+#
+# if not os.path.isdir(DATA_PATH):
+#     os.makedirs(DATA_PATH)
+#
+# FILENAME = os.path.join(DATA_PATH, "transactions.csv")
+# FILENAME_FIRST_TRS = os.path.join(DATA_PATH, "first_transactions.csv")
+# FILENAME_CALCED = os.path.join(DATA_PATH, "calced.csv")
+# FILENAME_WOOF_TON = 'data.json'
+#
 
-DAY = 3
-DATA_PATH = f'data/day{DAY}'
-
-if not os.path.isdir(DATA_PATH):
-    os.makedirs(DATA_PATH)
-
-FILENAME = os.path.join(DATA_PATH, "transactions.csv")
-FILENAME_FIRST_TRS = os.path.join(DATA_PATH, "first_transactions.csv")
-FILENAME_CALCED = os.path.join(DATA_PATH, "calced.csv")
+# Инициализация глобальных переменных
+DAY = None
+START_DATE = None
+END_DATE = None
+DATA_PATH = None
+FILENAME = None
+FILENAME_FIRST_TRS = None
+FILENAME_CALCED = None
 FILENAME_WOOF_TON = 'data.json'
 
-# START_TIME = datetime.utcnow().replace(hour=16, minute=0, second=0, microsecond=0) - timedelta(hours=UTC_OFFSET)
-# END_TIME = START_TIME + timedelta(days=1)
 
-# Инициализация pytoniq
-# blockchain = pytoniq()
+def set_day(day_num):
+    global DAY, START_DATE, END_DATE, DATA_PATH, FILENAME, FILENAME_FIRST_TRS, FILENAME_CALCED
+
+    # Установка DAY
+    DAY = day_num
+
+    # Определение START_DATE и END_DATE
+    base_start_date = datetime.strptime("2024-11-12 16:00:00", "%Y-%m-%d %H:%M:%S")
+    base_end_date = datetime.strptime("2024-11-13 16:00:00", "%Y-%m-%d %H:%M:%S")
+
+    if DAY > 1:
+        START_DATE = base_start_date + timedelta(days=DAY - 1)
+        END_DATE = base_end_date + timedelta(days=DAY - 1)
+    else:
+        START_DATE = base_start_date
+        END_DATE = base_end_date
+
+    # Установка пути к данным и создание директории, если её нет
+    DATA_PATH = f'data/day{DAY}'
+    if not os.path.isdir(DATA_PATH):
+        os.makedirs(DATA_PATH)
+
+    # Определение путей к файлам
+    FILENAME = os.path.join(DATA_PATH, "transactions.csv")
+    FILENAME_FIRST_TRS = os.path.join(DATA_PATH, "first_transactions.csv")
+    FILENAME_CALCED = os.path.join(DATA_PATH, "calced.csv")
 
 
 def get_formatted_num(num):
@@ -187,7 +218,21 @@ def calc_woof_betted(first_trs):
     return calced
 
 
+def get_count_by_hour(df):
+    # Преобразуем столбец 'timestamp' в datetime
+    # df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    # Группируем по часу и считаем количество транзакций
+    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = df['date'].dt.floor('h')
+    hourly_counts = df['date'].value_counts().sort_index()
+
+    return hourly_counts
+
+
 async def main():
+    set_day(3)
+
     WOOF_BETTED = 224000
 
     trs = await get_transactions(
@@ -213,6 +258,8 @@ async def main():
     total_trs = len(trs)
     people_count = len(calced)
     other_trs_sum = total_trs - people_count
+
+    by_h = get_count_by_hour(calced)
 
     # TODO: статистика ставок:
     #  < 10 000
@@ -242,6 +289,9 @@ async def main():
     print(f'Банк $TON - {get_formatted_num(ton_sum)}')
 
     print('{reached:.2f} $TON за ставку {woof} $WOOF'.format(reached=reached, woof=WOOF_BETTED))
+
+    print('Статистика ставок по часам:')
+    print(by_h)
 
 
 if __name__ == '__main__':

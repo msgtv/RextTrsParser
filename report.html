@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчет за день 3</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #f4f4f4; }
+        .highlight { font-weight: bold; color: #1a73e8; }
+    </style>
+</head>
+<body>
+    <h1>Отчет за день 3</h1>
+    <h2>Статистика ставок</h2>
+    <ul>
+        <li>до 10к: 560</li>
+        <li>от 10к до 50к: 505</li>
+        <li>от 50к до 100к: 101</li>
+        <li>от 100к до 500к: 83</li>
+        <li>от 500к до 991к: 6</li>
+        <li>от 991к: 5</li>
+    </ul>
+
+    <h2>Ставки по часам</h2>
+    <table border="1" class="dataframe hourly-counts-table">
+  <thead>
+    <tr style="text-align: center;">
+      <th></th>
+      <th>count</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2024-11-14 16:00:00</th>
+      <td>547</td>
+    </tr>
+    <tr>
+      <th>2024-11-14 17:00:00</th>
+      <td>374</td>
+    </tr>
+    <tr>
+      <th>2024-11-14 18:00:00</th>
+      <td>339</td>
+    </tr>
+  </tbody>
+</table>
+
+    <h2>Сводка по банку</h2>
+    <p>Банк $WOOF - <span class="highlight">42 857 722,68</span></p>
+    <p>Банк $TON - <span class="highlight">6 957,03</span></p>
+    <p>36.36158485684615 $TON за ставку 224000 $WOOF</p>
+</body>
+</html>
