@@ -1,6 +1,8 @@
 import asyncio
 import json
+import os
 import re
+import locale
 
 import pandas as pd
 from time import sleep
@@ -15,11 +17,18 @@ PATTERN = re.compile(r'\d+(\.\d+)?\s+TON\s+Ref#\w+={6}', flags=re.IGNORECASE)
 
 UTC_OFFSET = 5  # Часовой пояс
 
-START_DATE = datetime.strptime("2024-11-12 16:00:00", "%Y-%m-%d %H:%M:%S")
-END_DATE = datetime.strptime("2024-11-13 16:00:00", "%Y-%m-%d %H:%M:%S")
+START_DATE = datetime.strptime("2024-11-14 16:00:00", "%Y-%m-%d %H:%M:%S")
+END_DATE = datetime.strptime("2024-11-15 16:00:00", "%Y-%m-%d %H:%M:%S")
 
-FILENAME = "transactions.csv"
-FILENAME_FIRST_TRS = "first_transactions.csv"
+DAY = 3
+DATA_PATH = f'data/day{DAY}'
+
+if not os.path.isdir(DATA_PATH):
+    os.makedirs(DATA_PATH)
+
+FILENAME = os.path.join(DATA_PATH, "transactions.csv")
+FILENAME_FIRST_TRS = os.path.join(DATA_PATH, "first_transactions.csv")
+FILENAME_CALCED = os.path.join(DATA_PATH, "calced.csv")
 FILENAME_WOOF_TON = 'data.json'
 
 # START_TIME = datetime.utcnow().replace(hour=16, minute=0, second=0, microsecond=0) - timedelta(hours=UTC_OFFSET)
@@ -27,6 +36,13 @@ FILENAME_WOOF_TON = 'data.json'
 
 # Инициализация pytoniq
 # blockchain = pytoniq()
+
+
+def get_formatted_num(num):
+    locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')  # Установите нужную локаль
+    num = locale.format_string('%.2f', num, grouping=True)
+    return num
+
 
 
 def get_woof_count(data_dict, ton_count, left=None, right=None):
@@ -68,7 +84,10 @@ async def get_transactions_in_time_range(address):
                 transactions = await client.get_transactions(address, 1000, from_lt=from_lt, from_hash=from_hash)
 
                 for tx in transactions:
-                    dt = get_tx_datetime(tx)
+                    try:
+                        dt = get_tx_datetime(tx)
+                    except Exception as e:
+                        continue
 
                     if dt > END_DATE:
                         continue
@@ -79,9 +98,7 @@ async def get_transactions_in_time_range(address):
                 else:
                     from_lt = tx.prev_trans_lt
                     from_hash = tx.prev_trans_hash
-                    print('next')
             except EndOfParsing:
-                print('end parsing')
                 return trs
 
 
@@ -125,7 +142,7 @@ async def get_transactions(address, from_: str = 'f'):
 
         trs = prepare_transactions(trs)
 
-        trs.to_csv(FILENAME)
+        trs.to_csv(FILENAME, index=False)
 
         return trs
 
@@ -184,22 +201,54 @@ async def main():
 
     calced = calc_woof_betted(first_trs)
 
-    calced.to_csv('calced.csv', index=False)
+    calced.to_csv(FILENAME_CALCED, index=False)
 
-    woof_sum = float(calced['woofs'].sum())
+    woofs = calced['woofs']
+    woof_sum = round(float(woofs.sum()), 2)
 
-    ton_sum = float(trs['value'].sum())
+    ton_sum = round(float(trs['value'].sum()), 2)
 
     reached = (WOOF_BETTED / woof_sum) * ton_sum
 
-    print(f'Банк $WOOF - {woof_sum}')
-    print(f'Банк $TON - {ton_sum}')
+    total_trs = len(trs)
+    people_count = len(calced)
+    other_trs_sum = total_trs - people_count
+
+    # TODO: статистика ставок:
+    #  < 10 000
+    st1 = woofs[woofs < 10000].count()
+    st2 = woofs[woofs >= 10000][woofs < 50000].count()
+    st3 = woofs[woofs >= 50000][woofs < 100000].count()
+    st4 = woofs[woofs >= 100000][woofs < 500000].count()
+    st5 = woofs[woofs >= 500000][woofs < 991000].count()
+    st6 = woofs[woofs >= 991000].count()
+
+    print(f'День {DAY}')
+
+    s = f"""Статистика ставок:
+    до 10к: {st1}
+    от 10к до 50к: {st2}
+    от 50к до 100к: {st3}
+    от 100к до 500к: {st4}
+    от 500к до 991к: {st5}
+    от 991к: {st6}
+    
+    Транзакций: {total_trs}
+    Ставок: {people_count}
+    Обмены и замарозки: {other_trs_sum}\n\n"""
+
+    print(s)
+    print(f'Банк $WOOF - {get_formatted_num(woof_sum)}')
+    print(f'Банк $TON - {get_formatted_num(ton_sum)}')
 
     print('{reached:.2f} $TON за ставку {woof} $WOOF'.format(reached=reached, woof=WOOF_BETTED))
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as err:
+        print(f'Error: {err}')
 
 
 
