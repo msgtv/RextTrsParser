@@ -89,4 +89,4 @@ if __name__ == '__main__':
     try:
         asyncio.run(main(4, 't'))
     except Exception as err:
-        print(f'Error: {err}')
+        print(f'Error {Exception.__class__.__name__}: {err}')
