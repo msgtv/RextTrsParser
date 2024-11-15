@@ -69,9 +69,9 @@ def set_day(day_num):
     FILENAME_CALCED = os.path.join(DATA_PATH, "calced.csv")
 
 
-def get_formatted_num(num):
+def get_formatted_num(num, num_count=2):
     locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')  # Установите нужную локаль
-    num = locale.format_string('%.2f', num, grouping=True)
+    num = locale.format_string(f'%.{num_count}f', num, grouping=True)
     return num
 
 
@@ -218,6 +218,20 @@ def calc_woof_betted(first_trs):
     return calced
 
 
+def get_stat_by_bet_volume(calced):
+    woofs = calced['woofs']
+    data = {
+        'до 10к': woofs[woofs < 10000].count(),
+        '10к - 50к': woofs[woofs >= 10000][woofs < 50000].count(),
+        '50к - 100к': woofs[woofs >= 50000][woofs < 100000].count(),
+        '100к - 500к': woofs[woofs >= 100000][woofs < 500000].count(),
+        '500к - 991к': woofs[woofs >= 500000][woofs < 991000].count(),
+        'от 991к': woofs[woofs >= 991000].count()
+    }
+
+    return data
+
+
 def get_count_by_hour(df):
     # Преобразуем столбец 'timestamp' в datetime
     # df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -227,7 +241,21 @@ def get_count_by_hour(df):
     df['date'] = df['date'].dt.floor('h')
     hourly_counts = df['date'].value_counts().sort_index()
 
-    return hourly_counts
+    data = []
+    for one_date, one_df in df.groupby('date'):
+        value_count = len(one_df)
+
+        one_data = {
+            'date': one_date,
+            'bet_count': value_count,
+        }
+
+        volume_stat = get_stat_by_bet_volume(one_df)
+        one_data.update(volume_stat)
+
+        data.append(one_data)
+
+    return pd.DataFrame(data)
 
 
 async def main():
@@ -237,7 +265,7 @@ async def main():
 
     trs = await get_transactions(
         TARGET_ADDRESS,
-        from_='t'
+        from_='f'
     )
 
     first_trs = get_first_trs(trs)
@@ -260,27 +288,19 @@ async def main():
     other_trs_sum = total_trs - people_count
 
     by_h = get_count_by_hour(calced)
-
-    # TODO: статистика ставок:
-    #  < 10 000
-    st1 = woofs[woofs < 10000].count()
-    st2 = woofs[woofs >= 10000][woofs < 50000].count()
-    st3 = woofs[woofs >= 50000][woofs < 100000].count()
-    st4 = woofs[woofs >= 100000][woofs < 500000].count()
-    st5 = woofs[woofs >= 500000][woofs < 991000].count()
-    st6 = woofs[woofs >= 991000].count()
+    vol_stat = get_stat_by_bet_volume(calced)
 
     print(f'День {DAY}')
 
-    s = f"""Статистика ставок:
-    до 10к: {st1}
-    от 10к до 50к: {st2}
-    от 50к до 100к: {st3}
-    от 100к до 500к: {st4}
-    от 500к до 991к: {st5}
-    от 991к: {st6}
+    print('Статистика ставок по часам:')
+    print(by_h)
+
+    s = f"""Статистика ставок:"""
+
+    for k, v in vol_stat.items():
+        s += f'\n\t{k}: {v}'
     
-    Транзакций: {total_trs}
+    s += f"""Транзакций: {total_trs}
     Ставок: {people_count}
     Обмены и замарозки: {other_trs_sum}\n\n"""
 
@@ -288,10 +308,10 @@ async def main():
     print(f'Банк $WOOF - {get_formatted_num(woof_sum)}')
     print(f'Банк $TON - {get_formatted_num(ton_sum)}')
 
-    print('{reached:.2f} $TON за ставку {woof} $WOOF'.format(reached=reached, woof=WOOF_BETTED))
+    woof_price = ton_sum / woof_sum
+    print(f'Цена $WOOF в {DAY} день - {get_formatted_num(woof_price, 7)} $TON')
 
-    print('Статистика ставок по часам:')
-    print(by_h)
+    # print('{reached:.2f} $TON за ставку {woof} $WOOF'.format(reached=reached, woof=WOOF_BETTED))
 
 
 if __name__ == '__main__':

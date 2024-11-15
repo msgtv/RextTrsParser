@@ -7,17 +7,17 @@ class HTMLReportGenerator:
         self.env = Environment(loader=FileSystemLoader(template_path))
         self.template = self.env.get_template(template_name)
 
-    def generate_report(self, day, stats, hourly_counts_df, woof_sum, ton_sum, reached, woof_betted, output_file='report.html'):
-        hourly_counts_table = hourly_counts_df.to_frame().to_html(classes="hourly-counts-table", justify="center")
+    def generate_report(self, day, hourly_counts_df: pd.DataFrame, woof_sum, ton_sum, woof_price, output_file='report.html'):
+        hourly_counts_df.set_index('date', inplace=True, drop=True)
+        hourly_counts_df.index.name = None
+        hourly_counts_table = hourly_counts_df.to_html(classes="hourly-counts-table", justify="center")
 
         html_content = self.template.render(
             day=day,
-            stats=stats,
             hourly_counts_table=hourly_counts_table,
             woof_sum=woof_sum,
             ton_sum=ton_sum,
-            reached=reached,
-            woof_betted=woof_betted
+            woof_price=woof_price,
         )
 
         with open(output_file, 'w', encoding='utf-8') as file:

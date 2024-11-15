@@ -46,7 +46,7 @@ TARGET_ADDRESS = "UQBBzGtr3y5pb1Vc2HhhbHFObxbWq2X4El3RSUJ3jO3wPyUa"
 
 
 async def main(day_num=1, dtype='f'):
-    settings = TransactionSettings(day_num=3)
+    settings = TransactionSettings(day_num=day_num)
     woof_data = WoofTonData(settings.FILENAME_WOOF_TON)
     transaction_data = TransactionData(
         filename=settings.FILENAME,
@@ -69,39 +69,27 @@ async def main(day_num=1, dtype='f'):
     # Расчёт данных для HTML отчёта
     woof_sum = round(float(calced['woofs'].sum()), 2)
     ton_sum = round(float(trs['value'].sum()), 2)
+    woof_price = round(ton_sum / woof_sum, 7)
 
     WOOF_BETTED = 224000
     reached = (WOOF_BETTED / woof_sum) * ton_sum
-    stats = {
-        'st1': calced['woofs'][calced['woofs'] < 10000].count(),
-        'st2': calced['woofs'][(calced['woofs'] >= 10000) & (calced['woofs'] < 50000)].count(),
-        'st3': calced['woofs'][(calced['woofs'] >= 50000) & (calced['woofs'] < 100000)].count(),
-        'st4': calced['woofs'][(calced['woofs'] >= 100000) & (calced['woofs'] < 500000)].count(),
-        'st5': calced['woofs'][(calced['woofs'] >= 500000) & (calced['woofs'] < 991000)].count(),
-        'st6': calced['woofs'][calced['woofs'] >= 991000].count(),
-    }
 
-    hourly_counts = transaction_data.get_hourly_counts(calced)
+    hourly_stat = transaction_data.get_stat_by_hour(calced)
 
     # Генерация HTML отчета
     report_generator = HTMLReportGenerator()
     report_generator.generate_report(
         day=settings.DAY,
-        stats=stats,
-        hourly_counts_df=hourly_counts,
+        hourly_counts_df=hourly_stat,
         woof_sum=transaction_data.get_formatted_num(woof_sum),
         ton_sum=transaction_data.get_formatted_num(ton_sum),
-        reached=reached,
-        woof_betted=WOOF_BETTED
+        woof_price=woof_price,
+        output_file=f'day_{settings.DAY}_report.html',
     )
 
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main())
+        asyncio.run(main(3, 't'))
     except Exception as err:
         print(f'Error: {err}')
-
-
-if __name__ == '__main__':
-    asyncio.run(main(1))

@@ -57,6 +57,8 @@ class TransactionData:
             while True:
                 tx_list = await client.get_transactions(self.address, 1000, from_lt=from_lt, from_hash=from_hash)
                 for tx in tx_list:
+                    if not hasattr(tx.in_msg.info, 'created_at'):
+                        continue
                     dt = datetime.fromtimestamp(tx.in_msg.info.created_at)
                     if dt > self.end_date:
                         continue
@@ -92,3 +94,47 @@ class TransactionData:
     def get_hourly_counts(df):
         df['date'] = pd.to_datetime(df['date']).dt.floor('h')
         return df['date'].value_counts().sort_index()
+
+    def get_stat_by_hour(self, df):
+        # Группируем по часу и считаем количество транзакций
+        df['date'] = pd.to_datetime(df['date'])
+        df['date'] = df['date'].dt.floor('h')
+
+        data = []
+        total_stat = self.get_stat_by_bet_volume(df)
+        total_stat.update({
+            'date': 'ВСЕГО',
+            'Ставок': len(df)
+        })
+        data.append(total_stat)
+
+        for one_date, one_df in df.groupby('date'):
+            value_count = len(one_df)
+
+            one_data = {
+                'date': one_date,
+                'Ставок': value_count,
+            }
+
+            volume_stat = self.get_stat_by_bet_volume(one_df)
+            one_data.update(volume_stat)
+
+            data.append(one_data)
+
+        data.append(total_stat)
+
+        return pd.DataFrame(data)
+
+    @staticmethod
+    def get_stat_by_bet_volume(df):
+        woofs = df['woofs']
+        data = {
+            'до 10к': woofs[woofs < 10000].count(),
+            '10к - 50к': woofs[woofs >= 10000][woofs < 50000].count(),
+            '50к - 100к': woofs[woofs >= 50000][woofs < 100000].count(),
+            '100к - 500к': woofs[woofs >= 100000][woofs < 500000].count(),
+            '500к - 991к': woofs[woofs >= 500000][woofs < 991000].count(),
+            'от 991к': woofs[woofs >= 991000].count()
+        }
+
+        return data

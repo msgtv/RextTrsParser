@@ -2,35 +2,83 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
     <title>Отчет за день {{ day }}</title>
+<!--    <style>-->
+<!--        body { font-family: Arial, sans-serif; margin: 20px; }-->
+<!--        h1, h2 { color: #333; }-->
+<!--        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }-->
+<!--        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }-->
+<!--        th { background-color: #f4f4f4; }-->
+<!--        .highlight { font-weight: bold; color: #1a73e8; }-->
+<!--    </style>-->
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1, h2 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-        th { background-color: #f4f4f4; }
-        .highlight { font-weight: bold; color: #1a73e8; }
+        /* Подключаем шрифт Ubuntu */
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        h1, h2 {
+            color: #2b2d42;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #5d5d5d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        td {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #f4f8fb;
+        }
+
+        .highlight {
+            font-weight: 900;
+            color: #000000;
+        }
+
+        /* Hover эффект для строк таблицы */
+        tr:hover td {
+            background-color: #f1f1f1;
+            transition: background-color 0.2s ease;
+        }
     </style>
 </head>
 <body>
     <h1>Отчет за день {{ day }}</h1>
-    <h2>Статистика ставок</h2>
-    <ul>
-        <li>до 10к: {{ stats['st1'] }}</li>
-        <li>от 10к до 50к: {{ stats['st2'] }}</li>
-        <li>от 50к до 100к: {{ stats['st3'] }}</li>
-        <li>от 100к до 500к: {{ stats['st4'] }}</li>
-        <li>от 500к до 991к: {{ stats['st5'] }}</li>
-        <li>от 991к: {{ stats['st6'] }}</li>
-    </ul>
+    <h2>Сводка по банку</h2>
+    <p>Банк $WOOF - <span class="highlight">{{ woof_sum }} $WOOF</span></p>
+    <p>Банк $TON - <span class="highlight">{{ ton_sum }} $TON</span></p>
+    <p>1 $WOOF ~ <span class="highlight">{{ woof_price }} $TON</span></p>
 
     <h2>Ставки по часам</h2>
     {{ hourly_counts_table|safe }}
-
-    <h2>Сводка по банку</h2>
-    <p>Банк $WOOF - <span class="highlight">{{ woof_sum }}</span></p>
-    <p>Банк $TON - <span class="highlight">{{ ton_sum }}</span></p>
-    <p>{{ reached }} $TON за ставку {{ woof_betted }} $WOOF</p>
 </body>
 </html>
