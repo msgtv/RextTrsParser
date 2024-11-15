@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 
 class TransactionSettings:
-    base_start_date = datetime.strptime("2024-11-12 16:00:00", "%Y-%m-%d %H:%M:%S")
+    base_start_date = datetime.strptime("2024-11-12 16:15:00", "%Y-%m-%d %H:%M:%S")
     base_end_date = datetime.strptime("2024-11-13 16:00:00", "%Y-%m-%d %H:%M:%S")
 
     def __init__(self, day_num):

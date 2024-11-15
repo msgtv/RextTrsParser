@@ -71,9 +71,6 @@ async def main(day_num=1, dtype='f'):
     ton_sum = round(float(trs['value'].sum()), 2)
     woof_price = round(ton_sum / woof_sum, 7)
 
-    WOOF_BETTED = 224000
-    reached = (WOOF_BETTED / woof_sum) * ton_sum
-
     hourly_stat = transaction_data.get_stat_by_hour(calced)
 
     # Генерация HTML отчета
@@ -90,6 +87,6 @@ async def main(day_num=1, dtype='f'):
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(3, 't'))
+        asyncio.run(main(4, 't'))
     except Exception as err:
         print(f'Error: {err}')
