@@ -6,11 +6,23 @@ class BetCalculator:
         self.settings = settings
         self.woof_ton_data = woof_ton_data
 
-    def calculate_bet_stats(self, df):
+    def calculate_bet_trs(self, df):
         def calc_woof(row):
-            ton_count = row['value']
-            woof_count = TransactionData.get_woof_count(self.woof_ton_data.data, ton_count)
-            row['woofs'] = woof_count
+            if row['action'] == TransactionData.action_bet:
+                ton_count = row['value']
+                woof_count = TransactionData.get_woof_count(self.woof_ton_data.data, ton_count)
+                row['woofs'] = woof_count
+            else:
+                row['woofs'] = 0
             return row
 
         return df.apply(calc_woof, axis=1)
+
+    def get_big_bet_stat(self, df, bet_volume):
+        df = df[df['woofs'] >= bet_volume]
+        df = df['date'].dt.floor('min').value_counts().to_frame().reset_index()
+        df.sort_values(by=['date'], inplace=True)
+        df.reset_index(inplace=True, drop=True)
+        df['date'] = df['date'].dt.strftime("%d.%m %H:%M")
+
+        return df

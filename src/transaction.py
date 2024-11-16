@@ -7,6 +7,10 @@ from pytoniq import LiteClient
 
 
 class TransactionData:
+    action_bet = 'bet'
+    action_exchange = 'exchange'
+    action_freeze = 'freeze'
+
     pattern = re.compile(r'\d+(\.\d+)?\s+TON\s+Ref#\w+={6}', flags=re.IGNORECASE)
 
     def __init__(self, filename, address, start_date, end_date):
@@ -29,8 +33,8 @@ class TransactionData:
 
 
     @staticmethod
-    def get_formatted_num(num):
-        return locale.format_string('%.2f', num, grouping=True)
+    def get_formatted_num(num, num_count=2):
+        return locale.format_string(f'%.{num_count}f', num, grouping=True)
 
     @staticmethod
     def get_woof_count(data_dict, ton_count, left=None, right=None):
@@ -53,7 +57,7 @@ class TransactionData:
         from_lt = None
         from_hash = None
         transactions = []
-        async with LiteClient.from_mainnet_config(ls_i=0, trust_level=2) as client:
+        async with LiteClient.from_mainnet_config(ls_i=0, trust_level=2, timeout=10) as client:
             while True:
                 tx_list = await client.get_transactions(self.address, 1000, from_lt=from_lt, from_hash=from_hash)
                 for tx in tx_list:
@@ -86,35 +90,54 @@ class TransactionData:
             })
         return pd.DataFrame(data)
 
-    @staticmethod
-    def get_first_transactions(df):
-        return df.sort_values('date').drop_duplicates(subset=['from'], keep='first')
+    def mark_transactions(self, df):
+        df['action'] = ''
+
+        # метка ставок #1
+        first_trs_indexes = df.sort_values('date').drop_duplicates(subset=['from'], keep='first').index
+        mask_first_trs = df.index.isin(first_trs_indexes)
+        df.loc[mask_first_trs, 'action'] = self.action_bet
+
+        # метка платного обмена
+        mask_exchanges = df['value'] == 1
+        df.loc[mask_exchanges, 'action'] = self.action_exchange
+
+        # метка заморозки
+        mask_freeze_first = df['value'] == 5
+        freeze_trs = df[mask_freeze_first].drop_duplicates(subset=['from'], keep='first').index
+        mask_freeze_second = df.index.isin(freeze_trs)
+        df.loc[mask_freeze_second, 'action'] = self.action_freeze
+
+        # метка ставок с пустым 'action' и не равным 5 TON
+        mask_empty_action = df['action'] == ''
+        mask_second_non_five_ton = df['value'] != 5
+        df.loc[mask_empty_action & mask_second_non_five_ton, 'action'] = self.action_bet
+
+        return df
 
     @staticmethod
     def get_hourly_counts(df):
         df['date'] = pd.to_datetime(df['date']).dt.floor('h')
         return df['date'].value_counts().sort_index()
 
-    def get_stat_by_hour(self, df):
+    def get_stat(self, df):
         # Группируем по часу и считаем количество транзакций
         df['date'] = pd.to_datetime(df['date'])
-        df['date'] = df['date'].dt.floor('h')
+        df['hour'] = df['date'].dt.floor('h')
 
         data = []
-        total_stat = self.get_stat_by_bet_volume(df)
-        total_stat.update({
-            'date': 'ВСЕГО',
-            'Ставок': len(df)
-        })
+        total_stat = {'date': 'ВСЕГО'}
+
+        total_stat.update(self.get_stat_by_bet_volume(df))
+        total_stat.update(self.get_total_stat(df))
         data.append(total_stat)
 
-        for one_date, one_df in df.groupby('date'):
-            value_count = len(one_df)
-
+        for one_date, one_df in df.groupby('hour'):
             one_data = {
-                'date': one_date,
-                'Ставок': value_count,
+                'date': one_date.strftime('%d.%m %H:%M'),
             }
+
+            one_data.update(self.get_total_stat(one_df))
 
             volume_stat = self.get_stat_by_bet_volume(one_df)
             one_data.update(volume_stat)
@@ -125,10 +148,19 @@ class TransactionData:
 
         return pd.DataFrame(data)
 
+    def get_total_stat(self, df):
+        return {
+            'С': len(df[df['action'] == self.action_bet]),
+            'О': len(df[df['action'] == self.action_exchange]),
+            'З': len(df[df['action'] == self.action_freeze]),
+            'В': len(df[df['action'] != '']),
+        }
+
     @staticmethod
     def get_stat_by_bet_volume(df):
-        woofs = df['woofs']
+        woofs = df[df['woofs'] > 0]['woofs']
         data = {
+            '1': woofs[woofs < 4].count(),
             'до 10к': woofs[woofs < 10000].count(),
             '10к - 50к': woofs[woofs >= 10000][woofs < 50000].count(),
             '50к - 100к': woofs[woofs >= 50000][woofs < 100000].count(),

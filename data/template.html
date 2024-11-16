@@ -70,6 +70,28 @@
             transition: background-color 0.2s ease;
         }
     </style>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {packages: ['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Время', 'Количество'],
+          {% for row in big_bet_stat %}
+            ['{{ row[0] }}', {{ row[1] }}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          curveType: 'function',
+          legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        chart.draw(data, options);
+      }
+    </script>
 </head>
 <body>
     <h1>Отчет за день {{ day }}</h1>
@@ -79,6 +101,10 @@
     <p>1 $WOOF ~ <span class="highlight">{{ woof_price }} $TON</span></p>
 
     <h2>Ставки по часам</h2>
-    {{ hourly_counts_table|safe }}
+    {{ trs_stat_table|safe }}
+
+    <h2>Частота ставок от {{ big_bet_volume }} $WOOF</h2>
+
+    <div id="curve_chart" style="width: 100%; height: 500px"></div>
 </body>
 </html>
