@@ -2,6 +2,8 @@ import asyncio
 import re
 import locale
 
+from traceback import print_exc
+
 from src.bet_calc import BetCalculator
 from src.report import HTMLReportGenerator
 from src.settings import TransactionSettings
@@ -94,6 +96,7 @@ async def main(day_num=1, dtype='f', big_bet=70000):
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(4, 't'))
+        asyncio.run(main(4, 't', 70000))
     except Exception as err:
         print(f'Error {err.__class__.__name__}: {err}')
+        print_exc()

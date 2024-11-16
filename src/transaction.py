@@ -1,4 +1,5 @@
 import locale
+import os.path
 import re
 from datetime import datetime
 
@@ -20,14 +21,33 @@ class TransactionData:
         self.end_date = end_date
 
     async def get_transactions(self, t: str = 'f'):
-        if t == 'f':
+        if os.path.isfile(self.filename):
             df = pd.read_csv(self.filename)
             df['date'] = pd.to_datetime(df['date'])
         else:
-            df = await self.fetch_transactions()
-            df = self.prepare_transactions(df)
+            df = pd.DataFrame()
+
+        if t == 'f' and not df.empty:
+            return df
+
+        else:
+            last_lt = not df.empty and df.sort_values(by='date', ascending=False).loc[0, 'lt'] or None
+            new_trs = await self.fetch_transactions(last_lt)
+            new_df = self.prepare_transactions(new_trs)
+
+            df = pd.concat([df, new_df])
+            df.reset_index(inplace=True, drop=True)
 
             df.to_csv(self.filename, index=False)
+
+        # if t == 'f':
+        #     df = pd.read_csv(self.filename)
+        #     df['date'] = pd.to_datetime(df['date'])
+        # else:
+        #     df = await self.fetch_transactions()
+        #     df = self.prepare_transactions(df)
+        #
+        #     df.to_csv(self.filename, index=False)
 
         return df
 
@@ -53,7 +73,7 @@ class TransactionData:
 
         return woof_count
 
-    async def fetch_transactions(self):
+    async def fetch_transactions(self, last_lt):
         from_lt = None
         from_hash = None
         transactions = []
@@ -61,6 +81,8 @@ class TransactionData:
             while True:
                 tx_list = await client.get_transactions(self.address, 1000, from_lt=from_lt, from_hash=from_hash)
                 for tx in tx_list:
+                    if tx.lt == last_lt:
+                        return transactions
                     if not hasattr(tx.in_msg.info, 'created_at'):
                         continue
                     dt = datetime.fromtimestamp(tx.in_msg.info.created_at)
@@ -81,12 +103,13 @@ class TransactionData:
             if self.pattern.match(comment) is None:
                 continue
             from_address = tr.in_msg.info.src.to_str(is_user_friendly=True)
-            date = datetime.fromtimestamp(tr.in_msg.info.created_at).strftime("%Y-%m-%d %H:%M:%S")
+            date = pd.Timestamp.fromtimestamp(tr.in_msg.info.created_at)
             data.append({
                 'date': date,
                 'from': from_address,
                 'value': tr.in_msg.info.value_coins / 1e9,
                 'comment': comment,
+                'lt': tr.lt,
             })
         return pd.DataFrame(data)
 
