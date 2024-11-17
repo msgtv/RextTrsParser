@@ -71,7 +71,7 @@ async def main(day_num=1, dtype='f'):
     ton_sum = round(float(trs['value'].sum()), 2)
     woof_price = round(ton_sum / woof_sum, 7)
 
-    hourly_stat = transaction_data.get_stat_by_hour(calced)
+    hourly_stat = transaction_data.get_stat_by_hour(calced, trs)
 
     # Генерация HTML отчета
     report_generator = HTMLReportGenerator()
@@ -81,12 +81,12 @@ async def main(day_num=1, dtype='f'):
         woof_sum=transaction_data.get_formatted_num(woof_sum),
         ton_sum=transaction_data.get_formatted_num(ton_sum),
         woof_price=woof_price,
-        output_file=f'day_{settings.DAY}_report.html',
+        output_file=f'REX_day_{settings.DAY}_report.html',
     )
 
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(4, 't'))
+        asyncio.run(main(3, 'f'))
     except Exception as err:
         print(f'Error {Exception.__class__.__name__}: {err}')

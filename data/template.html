@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
 <!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-    <title>Отчет за день {{ day }}</title>
+    <title>Lost Dogs: REX. Отчет за день {{ day }}</title>
 <!--    <style>-->
 <!--        body { font-family: Arial, sans-serif; margin: 20px; }-->
 <!--        h1, h2 { color: #333; }-->
@@ -69,10 +69,14 @@
             background-color: #f1f1f1;
             transition: background-color 0.2s ease;
         }
+
+        a {
+          text-decoration: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Отчет за день {{ day }}</h1>
+    <h1>Lost Dogs: REX. Отчет за день {{ day }} by <a href="https://t.me/odincryptan">@odincryptan</a></h1>
     <h2>Сводка по банку</h2>
     <p>Банк $WOOF - <span class="highlight">{{ woof_sum }} $WOOF</span></p>
     <p>Банк $TON - <span class="highlight">{{ ton_sum }} $TON</span></p>

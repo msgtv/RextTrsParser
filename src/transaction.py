@@ -95,25 +95,32 @@ class TransactionData:
         df['date'] = pd.to_datetime(df['date']).dt.floor('h')
         return df['date'].value_counts().sort_index()
 
-    def get_stat_by_hour(self, df):
+    def get_stat_by_hour(self, first_trs, all_trs):
         # Группируем по часу и считаем количество транзакций
-        df['date'] = pd.to_datetime(df['date'])
-        df['date'] = df['date'].dt.floor('h')
+        first_trs['date'] = pd.to_datetime(first_trs['date'])
+        first_trs['date'] = first_trs['date'].dt.floor('h')
+
+        all_trs['date'] = pd.to_datetime(all_trs['date'])
+        all_trs['date'] = all_trs['date'].dt.floor('h')
 
         data = []
-        total_stat = self.get_stat_by_bet_volume(df)
+        total_stat = self.get_stat_by_bet_volume(first_trs)
         total_stat.update({
             'date': 'ВСЕГО',
-            'Ставок': len(df)
+            'Ставок': len(first_trs),
+            'О/З': len(all_trs) - len(first_trs)
         })
         data.append(total_stat)
 
-        for one_date, one_df in df.groupby('date'):
+        for one_date, one_df in first_trs.groupby('date'):
             value_count = len(one_df)
+
+            all_count = len(all_trs[all_trs['date'] == one_date])
 
             one_data = {
                 'date': one_date,
                 'Ставок': value_count,
+                'О/З': all_count - value_count
             }
 
             volume_stat = self.get_stat_by_bet_volume(one_df)
