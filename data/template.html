@@ -73,6 +73,13 @@
         a {
           text-decoration: none;
         }
+
+        #tgk-logo {
+            width: 50px;
+            border-radius: 50px;
+            position: relative;
+            top: 10px;
+        }
     </style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -98,8 +105,18 @@
     </script>
 </head>
 <body>
-    <h1>Lost Dogs: REX. Отчет за день {{ day }} by <a href="https://t.me/odincryptan">@odincryptan</a></h1>
-    <h2>Сводка по банку</h2>
+    <h1>Lost Dogs: REX</h1>
+    <h1>Отчет за день {{ day }} by
+        <a href="https://t.me/odincryptan">
+            <img
+                id="tgk-logo"
+                src="https://ltdfoto.ru/images/2024/11/17/photo_2024-09-29_01-05-05.jpg"
+                alt="TG channel logo"
+            >
+            @odincryptan
+        </a>
+    </h1>
+    <h2>Сводка по банку <a href="https://tonviewer.com/UQBBzGtr3y5pb1Vc2HhhbHFObxbWq2X4El3RSUJ3jO3wPyUa">(ссылка на банк)</a></h2>
     <p>Банк $WOOF - <span class="highlight">{{ woof_sum }} $WOOF</span></p>
     <p>Банк $TON - <span class="highlight">{{ ton_sum }} $TON</span></p>
     <p>1 $WOOF ~ <span class="highlight">{{ woof_price }} $TON</span></p>
