@@ -2,6 +2,8 @@ import asyncio
 import re
 import locale
 
+from traceback import print_exc
+
 from src.bet_calc import BetCalculator
 from src.report import HTMLReportGenerator
 from src.settings import TransactionSettings
@@ -45,7 +47,7 @@ TARGET_ADDRESS = "UQBBzGtr3y5pb1Vc2HhhbHFObxbWq2X4El3RSUJ3jO3wPyUa"
 #     print(transaction_data.get_hourly_counts(calced))
 
 
-async def main(day_num=1, dtype='f'):
+async def main(day_num=1, dtype='f', big_bet=70000):
     settings = TransactionSettings(day_num=day_num)
     woof_data = WoofTonData(settings.FILENAME_WOOF_TON)
     transaction_data = TransactionData(
@@ -59,34 +61,39 @@ async def main(day_num=1, dtype='f'):
 
     # prepared_data.to_csv(settings.FILENAME, index=False)
 
-    first_trs = transaction_data.get_first_transactions(trs)
+    trs = transaction_data.mark_transactions(trs)
     # first_trs.to_csv(settings.FILENAME_FIRST_TRS, index=False)
 
     calculator = BetCalculator(settings, woof_data)
-    calced = calculator.calculate_bet_stats(first_trs)
+    trs = calculator.calculate_bet_trs(trs)
     # calced.to_csv(settings.FILENAME_CALCED, index=False)
 
     # Расчёт данных для HTML отчёта
-    woof_sum = round(float(calced['woofs'].sum()), 2)
-    ton_sum = round(float(trs['value'].sum()), 2)
-    woof_price = round(ton_sum / woof_sum, 7)
+    woof_sum = float(trs['woofs'].sum())
+    ton_sum = float(trs['value'].sum())
 
-    hourly_stat = transaction_data.get_stat_by_hour(calced, trs)
+    woof_price = ton_sum / woof_sum
+
+    trs_stat = transaction_data.get_stat(trs)
+    big_bet_stat = calculator.get_big_bet_stat(trs, bet_volume=big_bet)
 
     # Генерация HTML отчета
     report_generator = HTMLReportGenerator()
     report_generator.generate_report(
         day=settings.DAY,
-        hourly_counts_df=hourly_stat,
+        trs_stat=trs_stat,
+        big_bet_stat=big_bet_stat,
+        big_bet_volume=transaction_data.get_formatted_num(big_bet, 0),
         woof_sum=transaction_data.get_formatted_num(woof_sum),
         ton_sum=transaction_data.get_formatted_num(ton_sum),
-        woof_price=woof_price,
+        woof_price=transaction_data.get_formatted_num(woof_price, 7),
         output_file=f'REX_day_{settings.DAY}_report.html',
     )
 
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(3, 'f'))
+        asyncio.run(main(4, 't', 70000))
     except Exception as err:
-        print(f'Error {Exception.__class__.__name__}: {err}')
+        print(f'Error {err.__class__.__name__}: {err}')
+        print_exc()
