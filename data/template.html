@@ -86,33 +86,38 @@
       google.charts.load('current', {packages: ['corechart']});
       google.charts.setOnLoadCallback(drawChart);
 
+      let chart, data, options;
+
       function drawChart() {
-        var data = google.visualization.arrayToDataTable([
+        data = google.visualization.arrayToDataTable([
           ['Время', 'Количество'],
           {% for row in big_bet_stat %}
             ['{{ row[0] }}', {{ row[1] }}],
           {% endfor %}
         ]);
 
-        var options = {
+        options = {
           curveType: 'function',
-          legend: { position: 'bottom' }
+          legend: { position: 'bottom' },
+          explorer: {
+              keepInBounds: true,
+          }
         };
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
         chart.draw(data, options);
-      }
+      };
     </script>
 </head>
 <body>
     <h1>Lost Dogs: REX</h1>
     <h1>Отчет за день {{ day }} by
         <a href="https://t.me/odincryptan">
-            <img
-                id="tgk-logo"
-                src="https://ltdfoto.ru/images/2024/11/17/photo_2024-09-29_01-05-05.jpg"
-                alt="TG channel logo"
-            >
+<!--            <img-->
+<!--                id="tgk-logo"-->
+<!--                src="https://ltdfoto.ru/images/2024/11/17/photo_2024-09-29_01-05-05.jpg"-->
+<!--                alt="TG channel logo"-->
+<!--            >-->
             @odincryptan
         </a>
     </h1>
