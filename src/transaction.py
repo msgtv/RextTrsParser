@@ -31,7 +31,7 @@ class TransactionData:
             return df
 
         else:
-            last_lt = not df.empty and df.sort_values(by='date', ascending=False).loc[0, 'lt'] or None
+            last_lt = not df.empty and df.sort_values(by='date', ascending=False).iloc[0]['lt'] or None
             new_trs = await self.fetch_transactions(last_lt)
             new_df = self.prepare_transactions(new_trs)
 
