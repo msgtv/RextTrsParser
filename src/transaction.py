@@ -122,19 +122,22 @@ class TransactionData:
         df.loc[mask_first_trs, 'action'] = self.action_bet
 
         # метка платного обмена
+        mask_empty_action = df['action'] == ''
         mask_exchanges = df['value'] == 1
-        df.loc[mask_exchanges, 'action'] = self.action_exchange
+        df.loc[mask_empty_action & mask_exchanges, 'action'] = self.action_exchange
 
         # метка заморозки
         mask_freeze_first = df['value'] == 5
+        mask_empty_action = df['action'] == ''
         freeze_trs = df[mask_freeze_first].drop_duplicates(subset=['from'], keep='first').index
         mask_freeze_second = df.index.isin(freeze_trs)
-        df.loc[mask_freeze_second, 'action'] = self.action_freeze
+        df.loc[mask_empty_action & mask_freeze_second, 'action'] = self.action_freeze
 
         # метка ставок с пустым 'action' и не равным 5 TON
-        mask_empty_action = df['action'] == ''
-        mask_second_non_five_ton = df['value'] != 5
-        df.loc[mask_empty_action & mask_second_non_five_ton, 'action'] = self.action_bet
+        # mask_second_non_five_ton = df['value'] != 5
+        # df.loc[mask_empty_action & mask_second_non_five_ton, 'action'] = self.action_bet
+
+        df = df[df['action'] != '']
 
         return df
 

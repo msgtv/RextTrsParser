@@ -93,7 +93,7 @@ async def main(day_num=1, dtype='f', big_bet=70000):
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(7, 't', 70000))
+        asyncio.run(main(6, 'f', 70000))
     except Exception as err:
         print(f'Error {err.__class__.__name__}: {err}')
         print_exc()
