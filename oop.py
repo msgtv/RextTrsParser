@@ -62,6 +62,7 @@ async def main(day_num=1, dtype='f', big_bet=70000):
     # prepared_data.to_csv(settings.FILENAME, index=False)
 
     trs = transaction_data.mark_transactions(trs)
+    trs = trs[~trs.duplicated(keep=False)]
     # first_trs.to_csv(settings.FILENAME_FIRST_TRS, index=False)
 
     calculator = BetCalculator(settings, woof_data)
@@ -93,7 +94,7 @@ async def main(day_num=1, dtype='f', big_bet=70000):
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(6, 'f', 70000))
+        asyncio.run(main(8, 't', 70000))
     except Exception as err:
         print(f'Error {err.__class__.__name__}: {err}')
         print_exc()
