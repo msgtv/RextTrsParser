@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <title>Lost Dogs: REX. Отчет за день 8</title>
+<!--    <style>-->
+<!--        body { font-family: Arial, sans-serif; margin: 20px; }-->
+<!--        h1, h2 { color: #333; }-->
+<!--        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }-->
+<!--        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }-->
+<!--        th { background-color: #f4f4f4; }-->
+<!--        .highlight { font-weight: bold; color: #1a73e8; }-->
+<!--    </style>-->
+    <style>
+        /* Подключаем шрифт Ubuntu */
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        h1, h2 {
+            color: #2b2d42;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #5d5d5d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        td {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #f4f8fb;
+        }
+
+        .highlight {
+            font-weight: 900;
+            color: #000000;
+        }
+
+        /* Hover эффект для строк таблицы */
+        tr:hover td {
+            background-color: #f1f1f1;
+            transition: background-color 0.2s ease;
+        }
+
+        a {
+          text-decoration: none;
+        }
+
+        #tgk-logo {
+            width: 50px;
+            border-radius: 50px;
+            position: relative;
+            top: 10px;
+        }
+    </style>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {packages: ['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      let chart, data, options;
+
+      function drawChart() {
+        data = google.visualization.arrayToDataTable([
+          ['Время', 'Количество'],
+          
+            ['19.11 16:15', 32],
+          
+            ['19.11 16:16', 16],
+          
+            ['19.11 16:17', 17],
+          
+            ['19.11 16:18', 5],
+          
+            ['19.11 16:19', 9],
+          
+            ['19.11 16:20', 5],
+          
+            ['19.11 16:21', 1],
+          
+            ['19.11 16:22', 4],
+          
+            ['19.11 16:23', 2],
+          
+        ]);
+
+        options = {
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          explorer: {
+              keepInBounds: true,
+          }
+        };
+
+        chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        chart.draw(data, options);
+      };
+    </script>
+</head>
+<body>
+    <h1>Lost Dogs: REX</h1>
+    <h1>Отчет за день 8 by
+        <a href="https://t.me/odincryptan">
+<!--            <img-->
+<!--                id="tgk-logo"-->
+<!--                src="https://ltdfoto.ru/images/2024/11/17/photo_2024-09-29_01-05-05.jpg"-->
+<!--                alt="TG channel logo"-->
+<!--            >-->
+            @odincryptan
+        </a>
+    </h1>
+    <h2>Сводка по банку <a href="https://tonviewer.com/UQBBzGtr3y5pb1Vc2HhhbHFObxbWq2X4El3RSUJ3jO3wPyUa">(ссылка на банк)</a></h2>
+    <p>Банк $WOOF - <span class="highlight">30 787 232,89 $WOOF</span></p>
+    <p>Банк $TON - <span class="highlight">1 064,62 $TON</span></p>
+    <p>1 $WOOF ~ <span class="highlight">0,0000346 $TON</span></p>
+
+    <h2>Ставки по часам</h2>
+    <table border="1" class="dataframe hourly-counts-table">
+  <thead>
+    <tr style="text-align: center;">
+      <th></th>
+      <th>1</th>
+      <th>до 10к</th>
+      <th>10к - 50к</th>
+      <th>50к - 100к</th>
+      <th>100к - 500к</th>
+      <th>500к - 991к</th>
+      <th>от 991к</th>
+      <th>С</th>
+      <th>О</th>
+      <th>З</th>
+      <th>В</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>ВСЕГО</th>
+      <td>59</td>
+      <td>99</td>
+      <td>84</td>
+      <td>29</td>
+      <td>66</td>
+      <td>2</td>
+      <td>4</td>
+      <td>284</td>
+      <td>102</td>
+      <td>30</td>
+      <td>416</td>
+    </tr>
+    <tr>
+      <th>19.11 16:00</th>
+      <td>59</td>
+      <td>99</td>
+      <td>84</td>
+      <td>29</td>
+      <td>66</td>
+      <td>2</td>
+      <td>4</td>
+      <td>284</td>
+      <td>102</td>
+      <td>30</td>
+      <td>416</td>
+    </tr>
+    <tr>
+      <th>ВСЕГО</th>
+      <td>59</td>
+      <td>99</td>
+      <td>84</td>
+      <td>29</td>
+      <td>66</td>
+      <td>2</td>
+      <td>4</td>
+      <td>284</td>
+      <td>102</td>
+      <td>30</td>
+      <td>416</td>
+    </tr>
+  </tbody>
+</table>
+
+    <h2>Частота ставок от 70 000 $WOOF</h2>
+
+    <div id="curve_chart" style="width: 100%; height: 500px"></div>
+</body>
+</html>
